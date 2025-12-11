@@ -1,22 +1,22 @@
 [
   {
     "file": "traseu1.gpx",
-    "name": "Vârf Moldoveanu (exemplu)",
-    "description": "Traseu de drumeție — exemplu adăugat pentru demonstrație.",
+    "name": "Moldoveanu Peak (example)",
+    "description": "Hiking trail — example added for demonstration.",
     "category": "hiking",
-    "difficulty": "mediu",
+    "difficulty": "medium",
     "duration": "6h",
-    "type": "dus-întors",
-    "parking": [50.79, 2.746]
+    "type": "out-and-back",
+    "parking": [45.5994, 24.7359]
   },
   {
     "file": "traseu2.gpx",
-    "name": "Transfăgărășan Moto (exemplu)",
-    "description": "Traseu moto spectacol — exemplu.",
+    "name": "Transfăgărășan Moto (example)",
+    "description": "Spectacular motorcycle route — example.",
     "category": "moto",
-    "difficulty": "mediu",
+    "difficulty": "medium",
     "duration": "6h",
-    "type": "dus-întors",
-    "parking": [50.79, 2.746]
+    "type": "out-and-back",
+    "parking": [45.5994, 24.7359]
   }
 ]
