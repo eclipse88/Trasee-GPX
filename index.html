@@ -127,7 +127,7 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Lucide Icons -->
+    <!-- Lucide UMD -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.560.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -144,7 +144,6 @@
             <div class="tab active" data-category="hiking"><i data-lucide="trekking"></i> Hiking</div>
             <div class="tab" data-category="moto"><i data-lucide="motorbike"></i> Moto</div>
         </div>
-
         <input id="search" class="search" placeholder="Caută trasee...">
         <div id="routesList" class="list"></div>
     </aside>
@@ -166,7 +165,9 @@
 
 <script>
     window.onload = function(){
-        lucide.replace(); // initialize icons
+
+        // Initialize Lucide icons (UMD)
+        window.lucide.replace();
 
         const ROUTES_JSON = 'routes.json';
         const GPX_FOLDER = 'gpx/';
@@ -241,8 +242,10 @@
 
                 if(coords.length){
                     const start=coords[0], end=coords[coords.length-1];
-                    L.marker([start[0],start[1]],{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map).bindPopup(`Start: ${route.name}<br>Altitudine: ${start[2].toFixed(0)} m`);
-                    L.marker([end[0],end[1]],{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map).bindPopup(`Sfârșit: ${route.name}<br>Altitudine: ${end[2].toFixed(0)} m`);
+                    L.marker([start[0],start[1]],{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map)
+                        .bindPopup(`Start: ${route.name}<br>Altitudine: ${start[2].toFixed(0)} m`);
+                    L.marker([end[0],end[1]],{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map)
+                        .bindPopup(`Sfârșit: ${route.name}<br>Altitudine: ${end[2].toFixed(0)} m`);
 
                     for(let i=1;i<coords.length-1;i+=Math.floor(coords.length/10)){
                         L.circleMarker([coords[i][0],coords[i][1]],{radius:4,color:'#1f6feb',fill:true,fillOpacity:0.7})
@@ -295,12 +298,10 @@
             });
         }
 
-        // Escape
         function escapeHtml(s){ return s? s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])):''; }
 
         loadRoutes();
     };
 </script>
-
 </body>
 </html>
