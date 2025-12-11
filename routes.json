@@ -6,7 +6,8 @@
     "category": "hiking",
     "difficulty": "mediu",
     "duration": "6h",
-    "type": "dus-întors"
+    "type": "dus-întors",
+    "parking": [50.79, 2.746]
   },
   {
     "file": "traseu2.gpx",
@@ -15,6 +16,7 @@
     "category": "moto",
     "difficulty": "mediu",
     "duration": "6h",
-    "type": "dus-întors"
+    "type": "dus-întors",
+    "parking": [50.79, 2.746]
   }
 ]

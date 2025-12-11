@@ -127,8 +127,8 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Lucide UMD -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.560.0/dist/umd/lucide.min.js"></script>
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
 
@@ -141,7 +141,7 @@
 <div class="container">
     <aside class="sidebar">
         <div class="tabs">
-            <div class="tab active" data-category="hiking"><i data-lucide="trekking"></i> Hiking</div>
+            <div class="tab active" data-category="hiking"><i data-lucide="mountain"></i> Hiking</div>
             <div class="tab" data-category="moto"><i data-lucide="motorbike"></i> Moto</div>
         </div>
         <input id="search" class="search" placeholder="Caută trasee...">
@@ -166,14 +166,15 @@
 <script>
     window.onload = function(){
 
-        // Initialize Lucide icons (UMD)
-        window.lucide.replace();
+        // Inițializare Lucide icons
+        lucide.createIcons();
 
         const ROUTES_JSON = 'routes.json';
         const GPX_FOLDER = 'gpx/';
         let map = L.map('map').setView([45.9432,24.9668],6);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
         let currentLayer=null;
+        let currentMarkers=[]; // pentru a șterge marker-ele vechi
         let ROUTES=[];
         let activeCategory='hiking';
         let altitudeChart=null;
@@ -213,6 +214,7 @@
                 tab.classList.add('active');
                 activeCategory = tab.getAttribute('data-category');
                 renderRoutes();
+                lucide.createIcons(); // reinițializează iconițele după schimbare tab
             });
         });
 
@@ -224,13 +226,18 @@
             if(!route.file) return;
             const url = GPX_FOLDER + route.file;
             document.getElementById('detailText').textContent=`Încarc ${route.name}...`;
+
+            // Șterge layer și markere vechi
+            if(currentLayer) map.removeLayer(currentLayer);
+            currentMarkers.forEach(m => map.removeLayer(m));
+            currentMarkers = [];
+
             try{
                 const resp = await fetch(url);
                 const text = await resp.text();
                 const xml = new DOMParser().parseFromString(text,"application/xml");
                 const geojson = toGeoJSON.gpx(xml);
 
-                if(currentLayer) map.removeLayer(currentLayer);
                 currentLayer = L.geoJSON(geojson,{style:{color:'#1f6feb',weight:4}}).addTo(map);
                 map.fitBounds(currentLayer.getBounds());
 
@@ -241,12 +248,45 @@
                 });
 
                 if(coords.length){
-                    const start=coords[0], end=coords[coords.length-1];
-                    L.marker([start[0],start[1]],{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map)
-                        .bindPopup(`Start: ${route.name}<br>Altitudine: ${start[2].toFixed(0)} m`);
-                    L.marker([end[0],end[1]],{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map)
-                        .bindPopup(`Sfârșit: ${route.name}<br>Altitudine: ${end[2].toFixed(0)} m`);
+                    const start = coords[0];
+                    const end = coords[coords.length-1];
 
+                    // Marker Start (verde)
+                    const startIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background:#28a745;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);">Start</div>',
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+                    const startMarker = L.marker([start[0], start[1]], {icon: startIcon}).addTo(map)
+                        .bindPopup(`Start: ${route.name}<br>Altitudine: ${start[2].toFixed(0)} m`);
+                    currentMarkers.push(startMarker);
+
+                    // Marker Finish (roșu)
+                    const endIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background:#dc3545;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);">Finish</div>',
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+                    const endMarker = L.marker([end[0], end[1]], {icon: endIcon}).addTo(map)
+                        .bindPopup(`Sfârșit: ${route.name}<br>Altitudine: ${end[2].toFixed(0)} m`);
+                    currentMarkers.push(endMarker);
+
+                    // Marker Parking (dacă există în JSON)
+                    if(route.parking && Array.isArray(route.parking) && route.parking.length === 2){
+                        const parkingIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#007bff;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">P</div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        });
+                        const parkingMarker = L.marker(route.parking, {icon: parkingIcon}).addTo(map)
+                            .bindPopup('Parcare recomandată');
+                        currentMarkers.push(parkingMarker);
+                    }
+
+                    // Puncte intermediare (opțional, păstrat ca înainte)
                     for(let i=1;i<coords.length-1;i+=Math.floor(coords.length/10)){
                         L.circleMarker([coords[i][0],coords[i][1]],{radius:4,color:'#1f6feb',fill:true,fillOpacity:0.7})
                             .addTo(map)
