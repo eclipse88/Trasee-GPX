@@ -2,11 +2,13 @@
   {
     "file": "traseu1.gpx",
     "name": "Vârf Moldoveanu (exemplu)",
-    "description": "Traseu de drumeție — exemplu adăugat pentru demonstrație."
+    "description": "Traseu de drumeție — exemplu adăugat pentru demonstrație.",
+    "category": "hiking"
   },
   {
     "file": "traseu2.gpx",
     "name": "Transfăgărășan Moto (exemplu)",
-    "description": "Traseu moto spectacol — exemplu."
+    "description": "Traseu moto spectacol — exemplu.",
+    "category": "moto"
   }
 ]
