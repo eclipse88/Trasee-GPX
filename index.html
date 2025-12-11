@@ -26,6 +26,13 @@
             flex-direction:column;
             padding:16px;
         }
+        header{
+            text-align:center;
+            margin-bottom:16px;
+        }
+        header h1{ font-size:24px; margin:0; color:var(--accent); }
+        header h2{ font-size:16px; margin:4px 0 0 0; color:var(--muted); }
+        header p{ font-size:14px; margin:4px 0 0 0; color:var(--muted); }
         .container{
             display:grid;
             grid-template-columns:380px 1fr;
@@ -53,8 +60,6 @@
             display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;
             box-shadow:0 6px 18px rgba(31,111,235,0.14);
         }
-        h1{ font-size:18px; margin:0; }
-        p.lead{ margin:0; color:var(--muted); font-size:13px; }
         .tabs{
             display:flex;
             gap:4px;
@@ -130,16 +135,15 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
+
+<header>
+    <h1>Welcome to Hiking and Motorcycling with Petru & Ioana</h1>
+    <h2>Discover hiking trails and moto routes</h2>
+    <p>Select a route to view map and altitude details</p>
+</header>
+
 <div class="container">
     <aside class="sidebar">
-        <div class="brand">
-            <div class="logo">TR</div>
-            <div>
-                <h1>Trasee Hiking & Moto</h1>
-                <p class="lead">Vizualizează și descarcă GPX-urile tale cu altitudine.</p>
-            </div>
-        </div>
-
         <div class="tabs">
             <div class="tab active" data-category="hiking">Hiking</div>
             <div class="tab" data-category="moto">Moto</div>
@@ -243,8 +247,15 @@
                 // Start/Finish markers
                 if(coords.length){
                     const start=coords[0], end=coords[coords.length-1];
-                    L.marker([start[0],start[1]],{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map);
-                    L.marker([end[0],end[1]],{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map);
+                    L.marker([start[0],start[1]],{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map).bindPopup(`Start: ${route.name}<br>Altitudine: ${start[2].toFixed(0)} m`);
+                    L.marker([end[0],end[1]],{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map).bindPopup(`Sfârșit: ${route.name}<br>Altitudine: ${end[2].toFixed(0)} m`);
+
+                    // Popups pentru puncte intermediare la fiecare 10% din traseu
+                    for(let i=1;i<coords.length-1;i+=Math.floor(coords.length/10)){
+                        L.circleMarker([coords[i][0],coords[i][1]],{radius:4,color:'#1f6feb',fill:true,fillOpacity:0.7})
+                            .addTo(map)
+                            .bindPopup(`Altitudine: ${coords[i][2].toFixed(0)} m`);
+                    }
                 }
 
                 // Altitudine Chart
@@ -299,5 +310,6 @@
         loadRoutes();
     };
 </script>
+
 </body>
 </html>
