@@ -143,6 +143,9 @@
             .map-card{ order:1; min-height:380px;}
         }
     </style>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 <div class="container" role="main">
@@ -183,273 +186,147 @@
     </section>
 </div>
 
-<!-- Librării: togeojson (convert GPX -> GeoJSON) -->
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- toGeoJSON JS -->
 <script src="https://unpkg.com/togeojson@0.16.0/dist/togeojson.min.js"></script>
 
-<!-- Google Maps JavaScript API (înlocuiește CHEIA) -->
 <script>
-    // Înlocuiește cu cheia ta:
-    const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY_HERE";
+    const ROUTES_JSON = 'routes.json';
+    const GPX_FOLDER = 'gpx/';
 
-    (function loadGoogleMaps(){
-        if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.includes("YOUR_GOOGLE")) {
-            console.warn("ATENȚIE: Nu ai setat cheia Google Maps. Adaug-o în index.html în variabila GOOGLE_MAPS_API_KEY.");
-        }
-        const s = document.createElement('script');
-        s.async = true;
-        s.defer = true;
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap`;
-        document.head.appendChild(s);
-    })();
-</script>
+    let map = L.map('map').setView([45.9432, 24.9668], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-<!-- Logica aplicației -->
-<script>
-    // ---- Config & utilitare ----
-    const ROUTES_JSON = 'routes.json'; // în repo root
-    const GPX_FOLDER = 'gpx/';         // folder cu fișierele GPX din repo
-    let map, currentLayer = null, startMarker=null, endMarker=null;
+    let currentLayer = null;
 
-    function qs(sel){ return document.querySelector(sel); }
-    function qsa(sel){ return document.querySelectorAll(sel); }
-
-    // ---- Inițializare map (callback Google Maps) ----
-    function initMap(){
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat:45.9432, lng:24.9668}, // centru România
-            zoom:6,
-            streetViewControl:false,
-            fullscreenControl:false,
-            mapTypeControl:false
-        });
-
-        // Load routes on init
-        loadRoutes();
-        attachUI();
-    }
-    window.initMap = initMap; // Google Maps callback
-
-    // ---- UI handlers ----
-    function attachUI(){
-        qs('#btnReload').addEventListener('click', ()=> loadRoutes(true));
-        qs('#search').addEventListener('input', e => filterList(e.target.value.trim().toLowerCase()));
-        // repo link — set to github repo automatically if gh meta found later
-    }
-
-    // ---- Load routes.json and render list ----
+    // --- Load routes.json ---
     let ROUTES = [];
     async function loadRoutes(force=false){
         try{
             const res = await fetch(ROUTES_JSON + (force ? '?_='+Date.now() : ''));
-            if(!res.ok) throw new Error('Nu am putut încărca ' + ROUTES_JSON + ' ('+res.status+')');
             ROUTES = await res.json();
             renderRoutesList(ROUTES);
-            // set repo link to raw github location if running on GitHub Pages
             setRepoLink();
         }catch(err){
             console.error(err);
-            qs('#routesList').innerHTML = `<div style="color:#b02727">Eroare la încărcare: ${err.message}</div>`;
+            document.getElementById('routesList').innerHTML = `<div style="color:#b02727">Eroare la încărcare: ${err.message}</div>`;
         }
     }
+    window.loadRoutes = loadRoutes;
 
+    // --- Repo link ---
     function setRepoLink(){
-        // Dacă pagina este pe github.io, putem construi link la repo
         const host = location.hostname;
         if(host.endsWith('github.io')){
-            // ex: username.github.io/reponame -> repo: https://github.com/username/reponame
             const parts = location.pathname.split('/').filter(Boolean);
             const user = host.split('.')[0];
             const repo = parts.length ? parts[0] : user;
             const repoUrl = `https://github.com/${user}/${repo}`;
-            qs('#openRepo').href = repoUrl;
-            qs('#openRepo').textContent = 'Repo GitHub';
-        } else {
-            qs('#openRepo').href = '#';
-        }
+            document.getElementById('openRepo').href = repoUrl;
+            document.getElementById('openRepo').textContent = 'Repo GitHub';
+        } else document.getElementById('openRepo').href = '#';
     }
 
+    // --- Render list ---
     function renderRoutesList(list){
-        const container = qs('#routesList');
+        const container = document.getElementById('routesList');
+        container.innerHTML = '';
         if(!list || !list.length){
-            container.innerHTML = `<div style="color:var(--muted)">Nu există trasee în ${ROUTES_JSON}.</div>`;
+            container.innerHTML = `<div style="color:var(--muted)">Nu există trasee.</div>`;
             return;
         }
-        container.innerHTML = '';
-        list.forEach((r, idx) => {
+        list.forEach(r => {
             const el = document.createElement('div');
             el.className = 'route';
             el.innerHTML = `
-        <div class="meta">
-          <h3>${escapeHtml(r.name || 'Unnamed route')}</h3>
-          <p>${escapeHtml(r.description || '')}</p>
-          <div class="actions">
-            <button class="btn" data-action="view" data-file="${encodeURIComponent(r.file)}">Vizualizează</button>
-            <a class="btn secondary" href="${GPX_FOLDER + encodeURIComponent(r.file)}" download>Descarcă GPX</a>
-            <span class="small">Fișier: ${escapeHtml(r.file)}</span>
-          </div>
-        </div>
-      `;
+            <div class="meta">
+              <h3>${escapeHtml(r.name)}</h3>
+              <p>${escapeHtml(r.description||'')}</p>
+              <div class="actions">
+                <button class="btn" data-file="${encodeURIComponent(r.file)}">Vizualizează</button>
+                <a class="btn secondary" href="${GPX_FOLDER+encodeURIComponent(r.file)}" download>Descarcă GPX</a>
+                <span class="small">Fișier: ${escapeHtml(r.file)}</span>
+              </div>
+            </div>
+        `;
             container.appendChild(el);
-
-            // attach view handler
-            el.querySelector('[data-action="view"]').addEventListener('click', () => {
-                showRouteOnMap(r);
-            });
+            el.querySelector('button').addEventListener('click', ()=> showRouteOnMap(r));
         });
     }
 
-    function filterList(q){
-        const filtered = ROUTES.filter(r => {
-            if(!q) return true;
-            const s = (r.name+' '+(r.description||'')+' '+r.file).toLowerCase();
-            return s.includes(q);
-        });
+    // --- Filter ---
+    document.getElementById('search').addEventListener('input', e=>{
+        const q = e.target.value.trim().toLowerCase();
+        const filtered = ROUTES.filter(r => (r.name+' '+(r.description||'')+' '+r.file).toLowerCase().includes(q));
         renderRoutesList(filtered);
-    }
+    });
 
-    // ---- Show route on map: fetch GPX, parse, draw ----
+    // --- Reload button ---
+    document.getElementById('btnReload').addEventListener('click', ()=> loadRoutes(true));
+
+    // --- Show GPX on map ---
     async function showRouteOnMap(route){
-        if(!route || !route.file) return;
-        const gpxUrl = GPX_FOLDER + route.file;
+        if(!route.file) return;
+        const url = GPX_FOLDER + route.file;
+        document.getElementById('detailText').textContent = `Încarc ${route.name}...`;
         try{
-            qs('#detailText').textContent = `Încarc ${route.name}...`;
-            // fetch GPX
-            const resp = await fetch(gpxUrl);
-            if(!resp.ok) throw new Error('Nu am putut încărca GPX: ' + resp.status);
+            const resp = await fetch(url);
             const text = await resp.text();
-
-            // parse XML
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(text, "application/xml");
-            // convert to GeoJSON
+            const xml = new DOMParser().parseFromString(text,"application/xml");
             const geojson = toGeoJSON.gpx(xml);
 
-            // Render on Google Maps
-            renderGeoJSONOnMap(geojson, route);
-            // update details
-            const downloadWrap = qs('#downloadWrap');
-            downloadWrap.innerHTML = `<a class="btn" href="${gpxUrl}" download>Descarcă GPX</a>`;
-            qs('#detailText').innerHTML = `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description || '')}`;
+            if(currentLayer) map.removeLayer(currentLayer);
+
+            currentLayer = L.geoJSON(geojson, {style:{color:'#1f6feb',weight:4}}).addTo(map);
+            map.fitBounds(currentLayer.getBounds());
+
+            const coords = geojson.features.flatMap(f=>{
+                if(f.geometry.type==='LineString') return f.geometry.coordinates.map(c=>[c[1],c[0]]);
+                if(f.geometry.type==='MultiLineString') return f.geometry.coordinates.flat().map(c=>[c[1],c[0]]);
+                return [];
+            });
+            if(coords.length){
+                const start = coords[0], end = coords[coords.length-1];
+                L.marker(start,{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map);
+                L.marker(end,{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map);
+            }
+
+            document.getElementById('detailText').innerHTML =
+                `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description||'')}<br>
+            <span class="small">Segment aproximativ: ${computeDistanceKm(coords).toFixed(2)} km</span>`;
+            document.getElementById('downloadWrap').innerHTML =
+                `<a class="btn" href="${url}" download>Descarcă GPX</a>`;
         }catch(err){
             console.error(err);
-            qs('#detailText').textContent = 'Eroare la încărcare GPX: ' + err.message;
+            document.getElementById('detailText').textContent = 'Eroare la încărcare GPX: '+err.message;
         }
     }
 
-    function clearMapLayer(){
-        if(currentLayer) {
-            currentLayer.setMap(null);
-            currentLayer = null;
-        }
-        if(startMarker){ startMarker.setMap(null); startMarker=null;}
-        if(endMarker){ endMarker.setMap(null); endMarker=null;}
-    }
-
-    function renderGeoJSONOnMap(geojson, route){
-        clearMapLayer();
-        if(!geojson || !geojson.features || !geojson.features.length){
-            qs('#detailText').textContent = 'GPX valid dar nu conține trasee (features).';
-            return;
-        }
-
-        // we will extract coordinates of LineString features to draw polylines
-        const allCoords = [];
-        const paths = []; // array of arrays of {lat,lng}
-        geojson.features.forEach(f => {
-            if(f.geometry && f.geometry.type === 'LineString'){
-                const coords = f.geometry.coordinates.map(c => ({lat:c[1], lng:c[0]}));
-                paths.push(coords);
-                allCoords.push(...coords);
-            }
-            // GPX tracks can also be MultiLineString -> join parts
-            if(f.geometry && f.geometry.type === 'MultiLineString'){
-                f.geometry.coordinates.forEach(segment => {
-                    const coords = segment.map(c=>({lat:c[1],lng:c[0]}));
-                    paths.push(coords);
-                    allCoords.push(...coords);
-                });
-            }
-        });
-
-        if(!paths.length){
-            qs('#detailText').textContent = 'Nu am găsit segmente LineString în GPX.';
-            return;
-        }
-
-        // Draw each path as a polyline
-        const mapPolylines = paths.map(path => new google.maps.Polyline({
-            path,
-            strokeColor: '#1f6feb',
-            strokeOpacity: 0.9,
-            strokeWeight: 4,
-            map
-        }));
-
-        // If multiple, group them in an MVCArray overlay (we'll keep reference to clear later)
-        currentLayer = {
-            setMap: function(m){
-                mapPolylines.forEach(p => p.setMap(m));
-            }
-        };
-
-        // Fit bounds
-        const bounds = new google.maps.LatLngBounds();
-        allCoords.forEach(c => bounds.extend(c));
-        map.fitBounds(bounds);
-
-        // Start / end markers (first and last coordinates overall)
-        const first = allCoords[0], last = allCoords[allCoords.length-1];
-        if(first){
-            startMarker = new google.maps.Marker({
-                position: first,
-                map,
-                title: 'Start',
-                label: {text:'S', color:'#fff', fontWeight:'700'}
-            });
-        }
-        if(last){
-            endMarker = new google.maps.Marker({
-                position: last,
-                map,
-                title: 'Sfârșit',
-                label: {text:'F', color:'#fff', fontWeight:'700'}
-            });
-        }
-
-        // Optional: show basic stats (distance) estimated from coordinates
-        const distanceKm = computeTotalDistanceKm(allCoords);
-        qs('#detailText').innerHTML = `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description||'')}<br><span class="small">Lungime aproximativă: ${distanceKm.toFixed(2)} km</span>`;
-    }
-
-    // ---- Utility: approximate distance from coord array (Haversine) ----
-    function computeTotalDistanceKm(coords){
-        if(!coords || coords.length < 2) return 0;
+    // --- Compute approximate distance (Haversine) ---
+    function computeDistanceKm(coords){
+        if(coords.length<2) return 0;
         let total=0;
         for(let i=1;i<coords.length;i++){
-            total += haversine(coords[i-1], coords[i]);
+            const a=coords[i-1], b=coords[i];
+            const R=6371;
+            const dLat=(b[0]-a[0])*Math.PI/180;
+            const dLon=(b[1]-a[1])*Math.PI/180;
+            const lat1=a[0]*Math.PI/180, lat2=b[0]*Math.PI/180;
+            const sinDLat=Math.sin(dLat/2), sinDLon=Math.sin(dLon/2);
+            const aa=sinDLat*sinDLat+sinDLon*sinDLon*Math.cos(lat1)*Math.cos(lat2);
+            total+=2*R*Math.atan2(Math.sqrt(aa),Math.sqrt(1-aa));
         }
         return total;
     }
-    function haversine(a,b){
-        const R = 6371; // km
-        const toRad = x => x * Math.PI/180;
-        const dLat = toRad(b.lat - a.lat);
-        const dLon = toRad(b.lng - a.lng);
-        const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
-        const sinDLat = Math.sin(dLat/2), sinDLon = Math.sin(dLon/2);
-        const aa = sinDLat*sinDLat + sinDLon*sinDLon * Math.cos(lat1)*Math.cos(lat2);
-        const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
-        return R * c;
-    }
 
-    // ---- Small helper to escape HTML injection from JSON (safety) ----
-    function escapeHtml(s){
-        if(!s) return '';
-        return s.replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]);
-    }
+    // --- Escape HTML ---
+    function escapeHtml(s){ return s? s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])):''; }
 
-    // Expose loadRoutes for manual reload if needed
-    window.loadRoutes = loadRoutes;
+    // --- Init ---
+    loadRoutes();
 </script>
 </body>
 </html>
