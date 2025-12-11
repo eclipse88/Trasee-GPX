@@ -6,14 +6,14 @@
     <title>Trasee Hiking & Moto — Pagina mea</title>
     <meta name="description" content="Pagina personală pentru încărcat și vizualizat trasee GPX (hiking & moto)."/>
 
-    <!-- Stiluri (curate, responsive) -->
+    <!-- Stiluri -->
     <style>
         :root{
             --bg:#f6f7fb;
             --card:#ffffff;
             --muted:#6b7280;
             --accent:#1f6feb;
-            --shadow: 0 6px 18px rgba(20,20,40,0.06);
+            --shadow:0 6px 18px rgba(20,20,40,0.06);
             --radius:12px;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
         }
@@ -29,8 +29,6 @@
             padding:24px;
             box-sizing:border-box;
         }
-
-        /* Layout: sidebar + map */
         .container{
             width:100%;
             max-width:1200px;
@@ -39,10 +37,7 @@
             grid-template-columns: 380px 1fr;
             gap:20px;
             align-items:stretch;
-            width:100%;
         }
-
-        /* Sidebar */
         .sidebar{
             background:var(--card);
             border-radius:var(--radius);
@@ -66,8 +61,6 @@
         }
         h1{ font-size:18px; margin:0; }
         p.lead{ margin:0; color:var(--muted); font-size:13px; }
-
-        /* Controls */
         .controls{ display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap }
         .btn{
             padding:8px 12px;
@@ -93,8 +86,6 @@
             border:1px solid #e6e9f2;
             font-size:14px;
         }
-
-        /* Routes list */
         .list { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
         .route{
             padding:10px;
@@ -110,8 +101,6 @@
         .route p { margin:0; color:var(--muted); font-size:13px;}
         .route .actions { display:flex; gap:8px; margin-top:8px; }
         .route .small { font-size:12px; color:var(--muted); }
-
-        /* Map pane */
         .map-card{
             border-radius:var(--radius);
             overflow:hidden;
@@ -121,8 +110,6 @@
             flex-direction:column;
         }
         #map { flex:1; min-height:520px; }
-
-        /* Details drawer below map */
         .details {
             padding:12px 16px;
             border-top:1px solid #f2f4fb;
@@ -134,8 +121,6 @@
         }
         .details .info { font-size:14px; color:var(--muted); }
         .tags { display:flex; gap:8px; flex-wrap:wrap; }
-
-        /* Responsive */
         @media (max-width:980px){
             .container { grid-template-columns: 1fr; }
             body{ padding:14px; }
@@ -165,9 +150,7 @@
 
         <input id="search" class="search" placeholder="Caută trasee (nume / descriere)">
 
-        <div id="routesList" class="list" aria-live="polite">
-            <!-- Lista de trasee va fi populată din routes.json -->
-        </div>
+        <div id="routesList" class="list" aria-live="polite"></div>
 
         <div style="margin-top:12px;font-size:13px;color:var(--muted);">
             Sugestie: adaugă fișierele GPX în folderul <code>/gpx/</code> și actualizează <code>routes.json</code>.
@@ -176,7 +159,6 @@
 
     <section class="map-card" aria-label="Hartă">
         <div id="map" role="application" aria-label="Harta traseelor"></div>
-
         <div class="details" id="details">
             <div class="info" id="detailText">Selectează un traseu din stânga pentru a-l vizualiza.</div>
             <div class="tags">
@@ -188,145 +170,148 @@
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- toGeoJSON JS -->
-<script src="https://unpkg.com/togeojson@0.16.0/dist/togeojson.min.js"></script>
+<!-- toGeoJSON JS corect -->
+<script src="https://cdn.jsdelivr.net/npm/togeojson@0.16.0/dist/togeojson.min.js"></script>
 
 <script>
-    const ROUTES_JSON = 'routes.json';
-    const GPX_FOLDER = 'gpx/';
+    window.onload = function() {
 
-    let map = L.map('map').setView([45.9432, 24.9668], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+        const ROUTES_JSON = 'routes.json';
+        const GPX_FOLDER = 'gpx/';
+        let map = L.map('map').setView([45.9432, 24.9668], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-    let currentLayer = null;
+        let currentLayer = null;
+        let ROUTES = [];
 
-    // --- Load routes.json ---
-    let ROUTES = [];
-    async function loadRoutes(force=false){
-        try{
-            const res = await fetch(ROUTES_JSON + (force ? '?_='+Date.now() : ''));
-            ROUTES = await res.json();
-            renderRoutesList(ROUTES);
-            setRepoLink();
-        }catch(err){
-            console.error(err);
-            document.getElementById('routesList').innerHTML = `<div style="color:#b02727">Eroare la încărcare: ${err.message}</div>`;
-        }
-    }
-    window.loadRoutes = loadRoutes;
-
-    // --- Repo link ---
-    function setRepoLink(){
-        const host = location.hostname;
-        if(host.endsWith('github.io')){
-            const parts = location.pathname.split('/').filter(Boolean);
-            const user = host.split('.')[0];
-            const repo = parts.length ? parts[0] : user;
-            const repoUrl = `https://github.com/${user}/${repo}`;
-            document.getElementById('openRepo').href = repoUrl;
-            document.getElementById('openRepo').textContent = 'Repo GitHub';
-        } else document.getElementById('openRepo').href = '#';
-    }
-
-    // --- Render list ---
-    function renderRoutesList(list){
-        const container = document.getElementById('routesList');
-        container.innerHTML = '';
-        if(!list || !list.length){
-            container.innerHTML = `<div style="color:var(--muted)">Nu există trasee.</div>`;
-            return;
-        }
-        list.forEach(r => {
-            const el = document.createElement('div');
-            el.className = 'route';
-            el.innerHTML = `
-            <div class="meta">
-              <h3>${escapeHtml(r.name)}</h3>
-              <p>${escapeHtml(r.description||'')}</p>
-              <div class="actions">
-                <button class="btn" data-file="${encodeURIComponent(r.file)}">Vizualizează</button>
-                <a class="btn secondary" href="${GPX_FOLDER+encodeURIComponent(r.file)}" download>Descarcă GPX</a>
-                <span class="small">Fișier: ${escapeHtml(r.file)}</span>
-              </div>
-            </div>
-        `;
-            container.appendChild(el);
-            el.querySelector('button').addEventListener('click', ()=> showRouteOnMap(r));
-        });
-    }
-
-    // --- Filter ---
-    document.getElementById('search').addEventListener('input', e=>{
-        const q = e.target.value.trim().toLowerCase();
-        const filtered = ROUTES.filter(r => (r.name+' '+(r.description||'')+' '+r.file).toLowerCase().includes(q));
-        renderRoutesList(filtered);
-    });
-
-    // --- Reload button ---
-    document.getElementById('btnReload').addEventListener('click', ()=> loadRoutes(true));
-
-    // --- Show GPX on map ---
-    async function showRouteOnMap(route){
-        if(!route.file) return;
-        const url = GPX_FOLDER + route.file;
-        document.getElementById('detailText').textContent = `Încarc ${route.name}...`;
-        try{
-            const resp = await fetch(url);
-            const text = await resp.text();
-            const xml = new DOMParser().parseFromString(text,"application/xml");
-            const geojson = toGeoJSON.gpx(xml);
-
-            if(currentLayer) map.removeLayer(currentLayer);
-
-            currentLayer = L.geoJSON(geojson, {style:{color:'#1f6feb',weight:4}}).addTo(map);
-            map.fitBounds(currentLayer.getBounds());
-
-            const coords = geojson.features.flatMap(f=>{
-                if(f.geometry.type==='LineString') return f.geometry.coordinates.map(c=>[c[1],c[0]]);
-                if(f.geometry.type==='MultiLineString') return f.geometry.coordinates.flat().map(c=>[c[1],c[0]]);
-                return [];
-            });
-            if(coords.length){
-                const start = coords[0], end = coords[coords.length-1];
-                L.marker(start,{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map);
-                L.marker(end,{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map);
+// --- Load routes.json ---
+        async function loadRoutes(force=false){
+            try{
+                const res = await fetch(ROUTES_JSON + (force ? '?_='+Date.now() : ''));
+                ROUTES = await res.json();
+                renderRoutesList(ROUTES);
+                setRepoLink();
+            }catch(err){
+                console.error(err);
+                document.getElementById('routesList').innerHTML = `<div style="color:#b02727">Eroare la încărcare: ${err.message}</div>`;
             }
-
-            document.getElementById('detailText').innerHTML =
-                `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description||'')}<br>
-            <span class="small">Segment aproximativ: ${computeDistanceKm(coords).toFixed(2)} km</span>`;
-            document.getElementById('downloadWrap').innerHTML =
-                `<a class="btn" href="${url}" download>Descarcă GPX</a>`;
-        }catch(err){
-            console.error(err);
-            document.getElementById('detailText').textContent = 'Eroare la încărcare GPX: '+err.message;
         }
-    }
+        window.loadRoutes = loadRoutes;
 
-    // --- Compute approximate distance (Haversine) ---
-    function computeDistanceKm(coords){
-        if(coords.length<2) return 0;
-        let total=0;
-        for(let i=1;i<coords.length;i++){
-            const a=coords[i-1], b=coords[i];
-            const R=6371;
-            const dLat=(b[0]-a[0])*Math.PI/180;
-            const dLon=(b[1]-a[1])*Math.PI/180;
-            const lat1=a[0]*Math.PI/180, lat2=b[0]*Math.PI/180;
-            const sinDLat=Math.sin(dLat/2), sinDLon=Math.sin(dLon/2);
-            const aa=sinDLat*sinDLat+sinDLon*sinDLon*Math.cos(lat1)*Math.cos(lat2);
-            total+=2*R*Math.atan2(Math.sqrt(aa),Math.sqrt(1-aa));
+// --- Repo link ---
+        function setRepoLink(){
+            const host = location.hostname;
+            if(host.endsWith('github.io')){
+                const parts = location.pathname.split('/').filter(Boolean);
+                const user = host.split('.')[0];
+                const repo = parts.length ? parts[0] : user;
+                const repoUrl = `https://github.com/${user}/${repo}`;
+                document.getElementById('openRepo').href = repoUrl;
+                document.getElementById('openRepo').textContent = 'Repo GitHub';
+            } else document.getElementById('openRepo').href = '#';
         }
-        return total;
-    }
 
-    // --- Escape HTML ---
-    function escapeHtml(s){ return s? s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])):''; }
+// --- Render list ---
+        function renderRoutesList(list){
+            const container = document.getElementById('routesList');
+            container.innerHTML = '';
+            if(!list || !list.length){
+                container.innerHTML = `<div style="color:var(--muted)">Nu există trasee.</div>`;
+                return;
+            }
+            list.forEach(r=>{
+                const el = document.createElement('div');
+                el.className = 'route';
+                el.innerHTML = `
+        <div class="meta">
+          <h3>${escapeHtml(r.name)}</h3>
+          <p>${escapeHtml(r.description||'')}</p>
+          <div class="actions">
+            <button class="btn" data-file="${encodeURIComponent(r.file)}">Vizualizează</button>
+            <a class="btn secondary" href="${GPX_FOLDER+encodeURIComponent(r.file)}" download>Descarcă GPX</a>
+            <span class="small">Fișier: ${escapeHtml(r.file)}</span>
+          </div>
+        </div>
+        `;
+                container.appendChild(el);
+                el.querySelector('button').addEventListener('click',()=>showRouteOnMap(r));
+            });
+        }
 
-    // --- Init ---
-    loadRoutes();
+// --- Filter ---
+        document.getElementById('search').addEventListener('input', e=>{
+            const q = e.target.value.trim().toLowerCase();
+            const filtered = ROUTES.filter(r => (r.name+' '+(r.description||'')+' '+r.file).toLowerCase().includes(q));
+            renderRoutesList(filtered);
+        });
+
+// --- Reload button ---
+        document.getElementById('btnReload').addEventListener('click', ()=> loadRoutes(true));
+
+// --- Show GPX on map ---
+        async function showRouteOnMap(route){
+            if(!route.file) return;
+            const url = GPX_FOLDER + route.file;
+            document.getElementById('detailText').textContent = `Încarc ${route.name}...`;
+            try{
+                const resp = await fetch(url);
+                const text = await resp.text();
+                const xml = new DOMParser().parseFromString(text,"application/xml");
+                const geojson = toGeoJSON.gpx(xml);
+
+                if(currentLayer) map.removeLayer(currentLayer);
+                currentLayer = L.geoJSON(geojson,{style:{color:'#1f6feb',weight:4}}).addTo(map);
+                map.fitBounds(currentLayer.getBounds());
+
+                const coords = geojson.features.flatMap(f=>{
+                    if(f.geometry.type==='LineString') return f.geometry.coordinates.map(c=>[c[1],c[0]]);
+                    if(f.geometry.type==='MultiLineString') return f.geometry.coordinates.flat().map(c=>[c[1],c[0]]);
+                    return [];
+                });
+
+                if(coords.length){
+                    const start = coords[0], end = coords[coords.length-1];
+                    L.marker(start,{title:'Start',icon:L.divIcon({className:'start-marker',html:'S'})}).addTo(map);
+                    L.marker(end,{title:'Sfârșit',icon:L.divIcon({className:'end-marker',html:'F'})}).addTo(map);
+                }
+
+                document.getElementById('detailText').innerHTML =
+                    `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description||'')}<br>
+        <span class="small">Segment aproximativ: ${computeDistanceKm(coords).toFixed(2)} km</span>`;
+                document.getElementById('downloadWrap').innerHTML =
+                    `<a class="btn" href="${url}" download>Descarcă GPX</a>`;
+
+            }catch(err){
+                console.error(err);
+                document.getElementById('detailText').textContent = 'Eroare la încărcare GPX: '+err.message;
+            }
+        }
+
+// --- Distance Haversine ---
+        function computeDistanceKm(coords){
+            if(coords.length<2) return 0;
+            let total=0;
+            for(let i=1;i<coords.length;i++){
+                const a=coords[i-1], b=coords[i];
+                const R=6371;
+                const dLat=(b[0]-a[0])*Math.PI/180;
+                const dLon=(b[1]-a[1])*Math.PI/180;
+                const lat1=a[0]*Math.PI/180, lat2=b[0]*Math.PI/180;
+                const sinDLat=Math.sin(dLat/2), sinDLon=Math.sin(dLon/2);
+                const aa=sinDLat*sinDLat+sinDLon*sinDLon*Math.cos(lat1)*Math.cos(lat2);
+                total+=2*R*Math.atan2(Math.sqrt(aa),Math.sqrt(1-aa));
+            }
+            return total;
+        }
+
+// --- Escape HTML ---
+        function escapeHtml(s){ return s? s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])):''; }
+
+        loadRoutes();
+
+    } // window.onload
 </script>
 </body>
 </html>
