@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Trasee Hiking & Moto — Pagina mea</title>
+    <meta name="description" content="Pagina personală pentru încărcat și vizualizat trasee GPX (hiking & moto)."/>
+
+    <!-- Stiluri (curate, responsive) -->
+    <style>
+        :root{
+            --bg:#f6f7fb;
+            --card:#ffffff;
+            --muted:#6b7280;
+            --accent:#1f6feb;
+            --shadow: 0 6px 18px rgba(20,20,40,0.06);
+            --radius:12px;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+        html,body,#map { height:100%; }
+        body{
+            margin:0;
+            background:linear-gradient(180deg,var(--bg),#ffffff);
+            color:#0f172a;
+            height:100vh;
+            display:flex;
+            align-items:stretch;
+            gap:24px;
+            padding:24px;
+            box-sizing:border-box;
+        }
+
+        /* Layout: sidebar + map */
+        .container{
+            width:100%;
+            max-width:1200px;
+            margin:0 auto;
+            display:grid;
+            grid-template-columns: 380px 1fr;
+            gap:20px;
+            align-items:stretch;
+            width:100%;
+        }
+
+        /* Sidebar */
+        .sidebar{
+            background:var(--card);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            padding:18px;
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+            min-height:520px;
+            overflow:auto;
+        }
+        .brand{
+            display:flex;
+            gap:12px;
+            align-items:center;
+        }
+        .logo{
+            width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6c4ef6);
+            display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;
+            box-shadow:0 6px 18px rgba(31,111,235,0.14);
+        }
+        h1{ font-size:18px; margin:0; }
+        p.lead{ margin:0; color:var(--muted); font-size:13px; }
+
+        /* Controls */
+        .controls{ display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap }
+        .btn{
+            padding:8px 12px;
+            border-radius:10px;
+            background:var(--accent);
+            color:white;
+            border:none;
+            cursor:pointer;
+            font-weight:600;
+            font-size:13px;
+        }
+        .btn.secondary{
+            background:transparent;
+            border:1px solid #e6e9f2;
+            color:var(--muted);
+        }
+        .search {
+            margin-top:6px;
+            display:block;
+            width:100%;
+            padding:8px 10px;
+            border-radius:10px;
+            border:1px solid #e6e9f2;
+            font-size:14px;
+        }
+
+        /* Routes list */
+        .list { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+        .route{
+            padding:10px;
+            border-radius:10px;
+            background:linear-gradient(180deg,rgba(250,250,255,1),#fff);
+            border:1px solid #f0f3fb;
+            display:flex;
+            gap:10px;
+            align-items:flex-start;
+        }
+        .route .meta { flex:1; }
+        .route h3 { margin:0 0 6px 0; font-size:15px; }
+        .route p { margin:0; color:var(--muted); font-size:13px;}
+        .route .actions { display:flex; gap:8px; margin-top:8px; }
+        .route .small { font-size:12px; color:var(--muted); }
+
+        /* Map pane */
+        .map-card{
+            border-radius:var(--radius);
+            overflow:hidden;
+            box-shadow:var(--shadow);
+            background:var(--card);
+            display:flex;
+            flex-direction:column;
+        }
+        #map { flex:1; min-height:520px; }
+
+        /* Details drawer below map */
+        .details {
+            padding:12px 16px;
+            border-top:1px solid #f2f4fb;
+            display:flex;
+            gap:16px;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+        }
+        .details .info { font-size:14px; color:var(--muted); }
+        .tags { display:flex; gap:8px; flex-wrap:wrap; }
+
+        /* Responsive */
+        @media (max-width:980px){
+            .container { grid-template-columns: 1fr; }
+            body{ padding:14px; }
+            .sidebar{ order:2; }
+            .map-card{ order:1; min-height:380px;}
+        }
+    </style>
+</head>
+<body>
+<div class="container" role="main">
+    <aside class="sidebar" aria-label="Lista trasee">
+        <div class="brand">
+            <div class="logo">TR</div>
+            <div>
+                <h1>Trasee Hiking & Moto</h1>
+                <p class="lead">Vizualizează și descarcă GPX-urile tale — static, pe GitHub Pages.</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="btnReload">Reîncarcă lista</button>
+            <a id="openRepo" class="btn secondary" href="#" target="_blank" rel="noreferrer">Deschide repo</a>
+        </div>
+
+        <input id="search" class="search" placeholder="Caută trasee (nume / descriere)">
+
+        <div id="routesList" class="list" aria-live="polite">
+            <!-- Lista de trasee va fi populată din routes.json -->
+        </div>
+
+        <div style="margin-top:12px;font-size:13px;color:var(--muted);">
+            Sugestie: adaugă fișierele GPX în folderul <code>/gpx/</code> și actualizează <code>routes.json</code>.
+        </div>
+    </aside>
+
+    <section class="map-card" aria-label="Hartă">
+        <div id="map" role="application" aria-label="Harta traseelor"></div>
+
+        <div class="details" id="details">
+            <div class="info" id="detailText">Selectează un traseu din stânga pentru a-l vizualiza.</div>
+            <div class="tags">
+                <div id="downloadWrap"></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Librării: togeojson (convert GPX -> GeoJSON) -->
+<script src="https://unpkg.com/togeojson@0.16.0/dist/togeojson.min.js"></script>
+
+<!-- Google Maps JavaScript API (înlocuiește CHEIA) -->
+<script>
+    // Înlocuiește cu cheia ta:
+    const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY_HERE";
+
+    (function loadGoogleMaps(){
+        if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.includes("YOUR_GOOGLE")) {
+            console.warn("ATENȚIE: Nu ai setat cheia Google Maps. Adaug-o în index.html în variabila GOOGLE_MAPS_API_KEY.");
+        }
+        const s = document.createElement('script');
+        s.async = true;
+        s.defer = true;
+        s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap`;
+        document.head.appendChild(s);
+    })();
+</script>
+
+<!-- Logica aplicației -->
+<script>
+    // ---- Config & utilitare ----
+    const ROUTES_JSON = 'routes.json'; // în repo root
+    const GPX_FOLDER = 'gpx/';         // folder cu fișierele GPX din repo
+    let map, currentLayer = null, startMarker=null, endMarker=null;
+
+    function qs(sel){ return document.querySelector(sel); }
+    function qsa(sel){ return document.querySelectorAll(sel); }
+
+    // ---- Inițializare map (callback Google Maps) ----
+    function initMap(){
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat:45.9432, lng:24.9668}, // centru România
+            zoom:6,
+            streetViewControl:false,
+            fullscreenControl:false,
+            mapTypeControl:false
+        });
+
+        // Load routes on init
+        loadRoutes();
+        attachUI();
+    }
+    window.initMap = initMap; // Google Maps callback
+
+    // ---- UI handlers ----
+    function attachUI(){
+        qs('#btnReload').addEventListener('click', ()=> loadRoutes(true));
+        qs('#search').addEventListener('input', e => filterList(e.target.value.trim().toLowerCase()));
+        // repo link — set to github repo automatically if gh meta found later
+    }
+
+    // ---- Load routes.json and render list ----
+    let ROUTES = [];
+    async function loadRoutes(force=false){
+        try{
+            const res = await fetch(ROUTES_JSON + (force ? '?_='+Date.now() : ''));
+            if(!res.ok) throw new Error('Nu am putut încărca ' + ROUTES_JSON + ' ('+res.status+')');
+            ROUTES = await res.json();
+            renderRoutesList(ROUTES);
+            // set repo link to raw github location if running on GitHub Pages
+            setRepoLink();
+        }catch(err){
+            console.error(err);
+            qs('#routesList').innerHTML = `<div style="color:#b02727">Eroare la încărcare: ${err.message}</div>`;
+        }
+    }
+
+    function setRepoLink(){
+        // Dacă pagina este pe github.io, putem construi link la repo
+        const host = location.hostname;
+        if(host.endsWith('github.io')){
+            // ex: username.github.io/reponame -> repo: https://github.com/username/reponame
+            const parts = location.pathname.split('/').filter(Boolean);
+            const user = host.split('.')[0];
+            const repo = parts.length ? parts[0] : user;
+            const repoUrl = `https://github.com/${user}/${repo}`;
+            qs('#openRepo').href = repoUrl;
+            qs('#openRepo').textContent = 'Repo GitHub';
+        } else {
+            qs('#openRepo').href = '#';
+        }
+    }
+
+    function renderRoutesList(list){
+        const container = qs('#routesList');
+        if(!list || !list.length){
+            container.innerHTML = `<div style="color:var(--muted)">Nu există trasee în ${ROUTES_JSON}.</div>`;
+            return;
+        }
+        container.innerHTML = '';
+        list.forEach((r, idx) => {
+            const el = document.createElement('div');
+            el.className = 'route';
+            el.innerHTML = `
+        <div class="meta">
+          <h3>${escapeHtml(r.name || 'Unnamed route')}</h3>
+          <p>${escapeHtml(r.description || '')}</p>
+          <div class="actions">
+            <button class="btn" data-action="view" data-file="${encodeURIComponent(r.file)}">Vizualizează</button>
+            <a class="btn secondary" href="${GPX_FOLDER + encodeURIComponent(r.file)}" download>Descarcă GPX</a>
+            <span class="small">Fișier: ${escapeHtml(r.file)}</span>
+          </div>
+        </div>
+      `;
+            container.appendChild(el);
+
+            // attach view handler
+            el.querySelector('[data-action="view"]').addEventListener('click', () => {
+                showRouteOnMap(r);
+            });
+        });
+    }
+
+    function filterList(q){
+        const filtered = ROUTES.filter(r => {
+            if(!q) return true;
+            const s = (r.name+' '+(r.description||'')+' '+r.file).toLowerCase();
+            return s.includes(q);
+        });
+        renderRoutesList(filtered);
+    }
+
+    // ---- Show route on map: fetch GPX, parse, draw ----
+    async function showRouteOnMap(route){
+        if(!route || !route.file) return;
+        const gpxUrl = GPX_FOLDER + route.file;
+        try{
+            qs('#detailText').textContent = `Încarc ${route.name}...`;
+            // fetch GPX
+            const resp = await fetch(gpxUrl);
+            if(!resp.ok) throw new Error('Nu am putut încărca GPX: ' + resp.status);
+            const text = await resp.text();
+
+            // parse XML
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(text, "application/xml");
+            // convert to GeoJSON
+            const geojson = toGeoJSON.gpx(xml);
+
+            // Render on Google Maps
+            renderGeoJSONOnMap(geojson, route);
+            // update details
+            const downloadWrap = qs('#downloadWrap');
+            downloadWrap.innerHTML = `<a class="btn" href="${gpxUrl}" download>Descarcă GPX</a>`;
+            qs('#detailText').innerHTML = `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description || '')}`;
+        }catch(err){
+            console.error(err);
+            qs('#detailText').textContent = 'Eroare la încărcare GPX: ' + err.message;
+        }
+    }
+
+    function clearMapLayer(){
+        if(currentLayer) {
+            currentLayer.setMap(null);
+            currentLayer = null;
+        }
+        if(startMarker){ startMarker.setMap(null); startMarker=null;}
+        if(endMarker){ endMarker.setMap(null); endMarker=null;}
+    }
+
+    function renderGeoJSONOnMap(geojson, route){
+        clearMapLayer();
+        if(!geojson || !geojson.features || !geojson.features.length){
+            qs('#detailText').textContent = 'GPX valid dar nu conține trasee (features).';
+            return;
+        }
+
+        // we will extract coordinates of LineString features to draw polylines
+        const allCoords = [];
+        const paths = []; // array of arrays of {lat,lng}
+        geojson.features.forEach(f => {
+            if(f.geometry && f.geometry.type === 'LineString'){
+                const coords = f.geometry.coordinates.map(c => ({lat:c[1], lng:c[0]}));
+                paths.push(coords);
+                allCoords.push(...coords);
+            }
+            // GPX tracks can also be MultiLineString -> join parts
+            if(f.geometry && f.geometry.type === 'MultiLineString'){
+                f.geometry.coordinates.forEach(segment => {
+                    const coords = segment.map(c=>({lat:c[1],lng:c[0]}));
+                    paths.push(coords);
+                    allCoords.push(...coords);
+                });
+            }
+        });
+
+        if(!paths.length){
+            qs('#detailText').textContent = 'Nu am găsit segmente LineString în GPX.';
+            return;
+        }
+
+        // Draw each path as a polyline
+        const mapPolylines = paths.map(path => new google.maps.Polyline({
+            path,
+            strokeColor: '#1f6feb',
+            strokeOpacity: 0.9,
+            strokeWeight: 4,
+            map
+        }));
+
+        // If multiple, group them in an MVCArray overlay (we'll keep reference to clear later)
+        currentLayer = {
+            setMap: function(m){
+                mapPolylines.forEach(p => p.setMap(m));
+            }
+        };
+
+        // Fit bounds
+        const bounds = new google.maps.LatLngBounds();
+        allCoords.forEach(c => bounds.extend(c));
+        map.fitBounds(bounds);
+
+        // Start / end markers (first and last coordinates overall)
+        const first = allCoords[0], last = allCoords[allCoords.length-1];
+        if(first){
+            startMarker = new google.maps.Marker({
+                position: first,
+                map,
+                title: 'Start',
+                label: {text:'S', color:'#fff', fontWeight:'700'}
+            });
+        }
+        if(last){
+            endMarker = new google.maps.Marker({
+                position: last,
+                map,
+                title: 'Sfârșit',
+                label: {text:'F', color:'#fff', fontWeight:'700'}
+            });
+        }
+
+        // Optional: show basic stats (distance) estimated from coordinates
+        const distanceKm = computeTotalDistanceKm(allCoords);
+        qs('#detailText').innerHTML = `<strong>${escapeHtml(route.name)}</strong> — ${escapeHtml(route.description||'')}<br><span class="small">Lungime aproximativă: ${distanceKm.toFixed(2)} km</span>`;
+    }
+
+    // ---- Utility: approximate distance from coord array (Haversine) ----
+    function computeTotalDistanceKm(coords){
+        if(!coords || coords.length < 2) return 0;
+        let total=0;
+        for(let i=1;i<coords.length;i++){
+            total += haversine(coords[i-1], coords[i]);
+        }
+        return total;
+    }
+    function haversine(a,b){
+        const R = 6371; // km
+        const toRad = x => x * Math.PI/180;
+        const dLat = toRad(b.lat - a.lat);
+        const dLon = toRad(b.lng - a.lng);
+        const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+        const sinDLat = Math.sin(dLat/2), sinDLon = Math.sin(dLon/2);
+        const aa = sinDLat*sinDLat + sinDLon*sinDLon * Math.cos(lat1)*Math.cos(lat2);
+        const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+        return R * c;
+    }
+
+    // ---- Small helper to escape HTML injection from JSON (safety) ----
+    function escapeHtml(s){
+        if(!s) return '';
+        return s.replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]);
+    }
+
+    // Expose loadRoutes for manual reload if needed
+    window.loadRoutes = loadRoutes;
+</script>
+</body>
+</html>
