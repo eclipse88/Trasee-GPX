@@ -3,12 +3,18 @@
     "file": "traseu1.gpx",
     "name": "Vârf Moldoveanu (exemplu)",
     "description": "Traseu de drumeție — exemplu adăugat pentru demonstrație.",
-    "category": "hiking"
+    "category": "hiking",
+    "difficulty": "mediu",
+    "duration": "6h",
+    "type": "dus-întors"
   },
   {
     "file": "traseu2.gpx",
     "name": "Transfăgărășan Moto (exemplu)",
     "description": "Traseu moto spectacol — exemplu.",
-    "category": "moto"
+    "category": "moto",
+    "difficulty": "mediu",
+    "duration": "6h",
+    "type": "dus-întors"
   }
 ]
