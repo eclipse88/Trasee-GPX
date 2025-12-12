@@ -121,6 +121,8 @@
 
       let map;
       let tileLayer;
+      let layerControl;
+      let currentBase = 'light'; // light | dark | satellite
       let currentLayer = null;
       let currentMarkers = [];
       let altitudeChart = null;
@@ -174,23 +176,54 @@
       }
 
       function initMap() {
-        map = L.map('map', { zoomControl: false }).setView(MAP_CENTER, 6);
-        updateTileLayer();
+        const baseLayers = {
+          light: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }),
+          dark: L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors, Stadia Maps'
+          }),
+          satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, USDA, USGS, AeroGRID, IGN, GIS User Community'
+          })
+        };
+
+        map = L.map('map', { zoomControl: false, layers: [baseLayers.light] }).setView(MAP_CENTER, 6);
+        tileLayer = baseLayers.light;
+        currentBase = 'light';
+
+        layerControl = L.control.layers(
+          {
+            'Standard': baseLayers.light,
+            'Dark': baseLayers.dark,
+            'Satellite': baseLayers.satellite
+          },
+          {},
+          { position: 'topright' }
+        ).addTo(map);
+
+        map.on('baselayerchange', (e) => {
+          currentBase = e.name.toLowerCase();
+          tileLayer = e.layer;
+        });
+
         L.control.zoom({ position: 'bottomright' }).addTo(map);
       }
 
       function updateTileLayer() {
         const isDark = html.classList.contains('dark');
-        const tileUrl = isDark
-          ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
-          : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const desired = currentBase === 'satellite'
+          ? 'satellite'
+          : isDark ? 'dark' : 'light';
 
-        if (tileLayer) {
-          tileLayer.remove();
+        const layers = layerControl._layers;
+        const match = Object.values(layers || {}).find(l => l.name && l.name.toLowerCase() === desired);
+        if (match && match.layer && tileLayer !== match.layer) {
+          map.addLayer(match.layer);
+          if (tileLayer) map.removeLayer(tileLayer);
+          tileLayer = match.layer;
+          currentBase = desired;
         }
-
-        tileLayer = L.tileLayer(tileUrl, { attribution: '&copy; OpenStreetMap contributors' });
-        tileLayer.addTo(map);
       }
 
         async function loadRoutes() {
