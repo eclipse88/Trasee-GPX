@@ -17,10 +17,10 @@
         extend: {
           colors: {
             brand: {
-              50: '#e0f2fe',
-              100: '#bae6fd',
-              500: '#0ea5e9',
-              600: '#0284c7'
+              50: '#f4f4f5',
+              100: '#e4e4e7',
+              500: '#71717a',
+              600: '#52525b'
             }
           }
         }
@@ -30,20 +30,19 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 flex flex-col dark:bg-slate-950 dark:text-slate-50" style="font-family:'Inter',system-ui,-apple-system,sans-serif;">
-  <header class="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-sky-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
-    <div class="absolute inset-0 opacity-50 blur-3xl bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,.2),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(56,189,248,.2),transparent_30%)] pointer-events-none"></div>
+<body class="min-h-screen bg-zinc-50 text-zinc-900 transition-colors duration-300 flex flex-col dark:bg-zinc-950 dark:text-zinc-50" style="font-family:'Inter',system-ui,-apple-system,sans-serif;">
+  <header class="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-900">
+    <div class="absolute inset-0 opacity-50 blur-3xl bg-[radial-gradient(circle_at_20%_20%,rgba(148,163,184,.22),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(161,161,170,.22),transparent_30%)] pointer-events-none"></div>
     <div class="relative mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-6 md:px-6">
       <div class="flex flex-1 items-center gap-4 md:gap-6">
         <img src="images/petru_ioana.jpeg" alt="Petru & Ioana" class="hidden h-16 w-16 rounded-full border-4 border-white object-cover shadow-2xl md:block">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-300">GPX Routes</p>
-          <h1 class="text-xl font-extrabold leading-tight text-slate-900 drop-shadow-sm dark:text-slate-50 md:text-2xl">Hiking & Motorcycling Adventures</h1>
-          <p class="text-sm text-slate-600 dark:text-slate-300">Pick a route, see start/finish/parking, download GPX.</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-800 dark:text-zinc-200">GPX Routes</p>
+          <h1 class="text-xl font-extrabold leading-tight text-zinc-900 drop-shadow-sm dark:text-zinc-50 md:text-2xl">Hiking & Motorcycling Adventures</h1>
+          <p class="text-sm text-zinc-600 dark:text-zinc-300">Pick a route, see start/finish/parking, download GPX.</p>
         </div>
       </div>
-      <img src="images/motorcycle.jpeg" alt="Motorcycle adventure" class="hidden h-16 w-16 rounded-full border-4 border-white object-cover shadow-2xl md:block">
-      <button id="themeToggle" type="button" aria-label="Comută tema" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white shadow-lg transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-sky-500 dark:focus:ring-offset-slate-950">
+      <button id="themeToggle" type="button" aria-label="Comută tema" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white shadow-lg transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-500 dark:focus:ring-2 dark:focus:ring-zinc-400 dark:focus:ring-offset-2 dark:focus:ring-offset-zinc-950">
         <span class="sr-only">Tema</span>
       </button>
     </div>
@@ -51,53 +50,53 @@
 
   <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-6 md:py-10">
     <div class="grid gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
-      <aside class="flex max-h-[70vh] flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:max-h-[none]">
+      <aside class="flex max-h-[70vh] flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-xl backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90 lg:max-h-[none]">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Explore the routes</h2>
-            <p class="text-sm text-slate-600 dark:text-slate-300">Hiking & moto with GPX details and start/finish/parking points.</p>
+            <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">Explore the routes</h2>
+            <p class="text-sm text-zinc-600 dark:text-zinc-300">Hiking & moto with GPX details and start/finish/parking points.</p>
           </div>
         </div>
 
-        <div class="flex gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-inner dark:border-slate-800 dark:bg-slate-950">
-          <button data-category="hiking" class="tab-button active inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white hover:shadow dark:text-slate-200 dark:hover:bg-slate-900">
+        <div class="flex gap-2 rounded-xl border border-slate-200 bg-zinc-50 p-1 shadow-inner dark:border-zinc-800 dark:bg-zinc-900">
+          <button data-category="hiking" class="tab-button active inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-white hover:shadow dark:text-zinc-200 dark:hover:bg-zinc-800">
             <i data-lucide="mountain" class="h-4 w-4"></i>
             Hiking
           </button>
-          <button data-category="moto" class="tab-button inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white hover:shadow dark:text-slate-200 dark:hover:bg-slate-900">
+          <button data-category="moto" class="tab-button inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-white hover:shadow dark:text-zinc-200 dark:hover:bg-zinc-800">
             <i data-lucide="bike" class="h-4 w-4"></i>
             Moto
           </button>
             </div>
 
         <label class="relative block">
-          <input id="search" type="search" placeholder="Search routes..." class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:ring-sky-800">
-          <i data-lucide="search" class="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500"></i>
+          <input id="search" type="search" placeholder="Search routes..." class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+          <i data-lucide="search" class="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500"></i>
         </label>
 
         <div id="routesList" class="flex flex-1 flex-col gap-3 overflow-auto pr-1">
-          <div class="flex items-center gap-2 text-sm text-slate-500">
+          <div class="flex items-center gap-2 text-sm text-zinc-500">
             <div class="h-2 w-2 rounded-full bg-sky-400"></div>
             Loading routes...
             </div>
         </div>
     </aside>
 
-      <section class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
+      <section class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 shadow-2xl backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90">
         <div class="relative overflow-hidden rounded-2xl">
-          <div id="map" class="h-[420px] w-full bg-slate-100 dark:bg-slate-800 md:h-[460px]"></div>
+          <div id="map" class="h-[420px] w-full bg-zinc-100 dark:bg-zinc-900 md:h-[460px]"></div>
         </div>
 
         <div class="relative px-4 pb-2">
-          <div class="absolute left-6 top-3 z-10 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          <div class="absolute left-6 top-3 z-10 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
             <i data-lucide="bar-chart-2" class="h-4 w-4"></i>
             Elevation
             </div>
-          <canvas id="altitudeChart" class="h-28 w-full rounded-2xl border border-slate-200 bg-slate-50/80 p-2 shadow-inner dark:border-slate-800 dark:bg-slate-950/60"></canvas>
+          <canvas id="altitudeChart" class="h-28 w-full rounded-2xl border border-zinc-200 bg-zinc-50/80 p-2 shadow-inner dark:border-zinc-800 dark:bg-zinc-900/80"></canvas>
         </div>
 
-        <div class="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
-          <div id="detailText" class="text-sm text-slate-600 dark:text-slate-300">Select a route to view details.</div>
+        <div class="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
+          <div id="detailText" class="text-sm text-zinc-600 dark:text-zinc-300">Select a route to view details.</div>
           <div id="downloadWrap" class="flex flex-wrap items-center gap-3"></div>
         </div>
     </section>
@@ -169,8 +168,8 @@
       function updateThemeToggleIcon() {
         const isDark = html.classList.contains('dark');
         themeToggle.innerHTML = isDark
-          ? '<i data-lucide="moon" class="h-5 w-5 text-slate-200"></i>'
-          : '<i data-lucide="sun" class="h-5 w-5 text-slate-700"></i>';
+          ? '<i data-lucide="moon" class="h-5 w-5 text-zinc-200"></i>'
+          : '<i data-lucide="sun" class="h-5 w-5 text-zinc-700"></i>';
         lucide.createIcons({ root: themeToggle });
       }
 
@@ -183,8 +182,8 @@
       function updateTileLayer() {
         const isDark = html.classList.contains('dark');
         const tileUrl = isDark
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+          ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
+          : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
         if (tileLayer) {
           tileLayer.remove();
@@ -214,32 +213,32 @@
             );
 
         if (!filtered.length) {
-          routesList.innerHTML = '<div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">No routes found.</div>';
+          routesList.innerHTML = '<div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">No routes found.</div>';
                 return;
             }
 
         filtered.forEach(route => {
           const card = document.createElement('article');
-          card.className = 'group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80';
+          card.className = 'group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900';
           card.innerHTML = `
             <div class="flex items-start justify-between gap-3">
               <div>
-                <h3 class="text-base font-semibold text-slate-900 dark:text-slate-50">${escapeHtml(route.name)}</h3>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">${escapeHtml(route.description || 'No description')}</p>
+                <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">${escapeHtml(route.name)}</h3>
+                <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">${escapeHtml(route.description || 'No description')}</p>
               </div>
-              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">${route.category === 'hiking' ? 'Hiking' : 'Moto'}</span>
+              <span class="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">${route.category === 'hiking' ? 'Hiking' : 'Moto'}</span>
             </div>
-            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              ${route.difficulty ? `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-800"><i data-lucide="activity" class="h-3.5 w-3.5"></i>${escapeHtml(route.difficulty)}</span>` : ''}
-              ${route.duration ? `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-800"><i data-lucide="timer" class="h-3.5 w-3.5"></i>${escapeHtml(route.duration)}</span>` : ''}
-              ${route.type ? `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-800"><i data-lucide="repeat" class="h-3.5 w-3.5"></i>${escapeHtml(route.type)}</span>` : ''}
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              ${route.difficulty ? `<span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 dark:bg-zinc-800"><i data-lucide="activity" class="h-3.5 w-3.5"></i>${escapeHtml(route.difficulty)}</span>` : ''}
+              ${route.duration ? `<span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 dark:bg-zinc-800"><i data-lucide="timer" class="h-3.5 w-3.5"></i>${escapeHtml(route.duration)}</span>` : ''}
+              ${route.type ? `<span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 dark:bg-zinc-800"><i data-lucide="repeat" class="h-3.5 w-3.5"></i>${escapeHtml(route.type)}</span>` : ''}
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
-              <button class="view-btn inline-flex items-center gap-2 rounded-lg bg-sky-500 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 dark:bg-sky-400 dark:text-slate-900 dark:hover:bg-sky-300 dark:focus:ring-sky-600 dark:focus:ring-offset-slate-950 sm:px-3 sm:py-2 sm:text-sm">
+              <button class="view-btn inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-white dark:focus:ring-2 dark:focus:ring-zinc-400 dark:focus:ring-offset-2 dark:focus:ring-offset-zinc-950 sm:px-3 sm:py-2 sm:text-sm">
                 <i data-lucide="map" class="h-4 w-4"></i>
                 View on map
                         </button>
-              <a class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-sky-500 dark:hover:text-sky-200 dark:focus:ring-sky-600 dark:focus:ring-offset-slate-950 sm:px-3 sm:py-2 sm:text-sm" href="${GPX_FOLDER + encodeURIComponent(route.file)}" download>
+              <a class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-400 dark:hover:text-zinc-50 dark:focus:ring-zinc-500 dark:focus:ring-offset-zinc-950 sm:px-3 sm:py-2 sm:text-sm" href="${GPX_FOLDER + encodeURIComponent(route.file)}" download>
                 <i data-lucide="download" class="h-4 w-4"></i>
                             Download
                         </a>
@@ -337,13 +336,13 @@
           const distanceKm = computeDistanceKm(coords);
           detailText.classList.remove('animate-pulse');
           detailText.innerHTML = `
-            <strong class="text-slate-900 dark:text-slate-50">${escapeHtml(route.name)}</strong><br>
-            <span class="text-slate-600 dark:text-slate-300">${escapeHtml(route.description || '')}</span><br>
-            <span class="text-xs text-slate-500 dark:text-slate-400"><strong>Distance:</strong> ${distanceKm.toFixed(2)} km</span>
+            <strong class="text-zinc-900 dark:text-zinc-50">${escapeHtml(route.name)}</strong><br>
+            <span class="text-zinc-600 dark:text-zinc-300">${escapeHtml(route.description || '')}</span><br>
+            <span class="text-xs text-zinc-500 dark:text-zinc-400"><strong>Distance:</strong> ${distanceKm.toFixed(2)} km</span>
           `;
 
           downloadWrap.innerHTML = `
-            <a class="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 dark:bg-sky-400 dark:text-slate-900 dark:hover:bg-sky-300 dark:focus:ring-sky-600 dark:focus:ring-offset-slate-950 sm:px-3 sm:py-2 sm:text-sm" href="${url}" download>
+            <a class="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-white dark:focus:ring-2 dark:focus:ring-zinc-400 dark:focus:ring-offset-2 dark:focus:ring-offset-[#0b0d12] sm:px-3 sm:py-2 sm:text-sm" href="${url}" download>
               <i data-lucide="download" class="h-4 w-4"></i>
               Download GPX
             </a>
@@ -367,7 +366,7 @@
             <div class="absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-br ${gradientClasses} shadow-xl ring-4 ring-white ring-opacity-70 dark:ring-slate-900">
               ${svg}
             </div>
-            <div class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-bold text-slate-800 shadow-sm ring-2 ring-white dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-900" style="color:${accentColor};">${badgeText}</div>
+            <div class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-bold text-zinc-800 shadow-sm ring-2 ring-white dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-900" style="color:${accentColor};">${badgeText}</div>
           </div>
         `;
       }
