@@ -104,7 +104,6 @@
 
         <div class="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
           <div id="detailText" class="text-sm text-zinc-600 dark:text-zinc-300">Select a route to view details.</div>
-          <div id="downloadWrap" class="flex flex-wrap items-center gap-3"></div>
         </div>
     </section>
 </div>
@@ -119,7 +118,6 @@
       const searchInput = document.getElementById('search');
       const routesList = document.getElementById('routesList');
       const detailText = document.getElementById('detailText');
-      const downloadWrap = document.getElementById('downloadWrap');
       const tabButtons = document.querySelectorAll('.tab-button');
 
       const ROUTES_JSON = 'routes.json';
@@ -423,13 +421,6 @@
             <span class="text-xs text-zinc-500 dark:text-zinc-400"><strong>Distance:</strong> ${distanceKm.toFixed(2)} km</span>
           `;
 
-          downloadWrap.innerHTML = `
-            <a class="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 dark:bg-amber-400 dark:text-zinc-900 dark:hover:bg-amber-300 dark:focus:ring-2 dark:focus:ring-amber-400 dark:focus:ring-offset-2 dark:focus:ring-offset-zinc-950 sm:px-3 sm:py-2 sm:text-sm" href="${url}" download>
-              <i data-lucide="download" class="h-4 w-4"></i>
-              Download GPX
-            </a>
-          `;
-          lucide.createIcons({ root: downloadWrap });
             } catch (err) {
           detailText.classList.remove('animate-pulse');
           detailText.innerHTML = `<span class="text-rose-600 dark:text-rose-400">Failed to load: ${escapeHtml(err.message)}</span>`;
