@@ -69,6 +69,13 @@
           </button>
             </div>
 
+        <label class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <span class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Show upcoming routes</span>
+          <button id="upcomingToggle" type="button" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 items-center rounded-full bg-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 dark:bg-zinc-700 dark:focus:ring-zinc-600 dark:focus:ring-offset-zinc-900">
+            <span class="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-transform dark:bg-zinc-200" id="upcomingToggleThumb"></span>
+          </button>
+        </label>
+
         <label class="relative block">
           <input id="search" type="search" placeholder="Search routes..." class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
           <i data-lucide="search" class="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500"></i>
@@ -128,6 +135,7 @@
       let altitudeChart = null;
       let routes = [];
       let activeCategory = 'hiking';
+      let showUpcomingRoutes = false;
       let lastRoute = null;
 
             lucide.createIcons();
@@ -164,6 +172,25 @@
             activeCategory = btn.dataset.category;
             renderRoutes();
           });
+        });
+
+        const upcomingToggle = document.getElementById('upcomingToggle');
+        const upcomingToggleThumb = document.getElementById('upcomingToggleThumb');
+        upcomingToggle.addEventListener('click', () => {
+          showUpcomingRoutes = !showUpcomingRoutes;
+          upcomingToggle.setAttribute('aria-checked', showUpcomingRoutes);
+          if (showUpcomingRoutes) {
+            upcomingToggle.classList.remove('bg-zinc-200', 'dark:bg-zinc-700');
+            upcomingToggle.classList.add('bg-zinc-600', 'dark:bg-zinc-500');
+            upcomingToggleThumb.classList.remove('translate-x-1');
+            upcomingToggleThumb.classList.add('translate-x-6');
+          } else {
+            upcomingToggle.classList.remove('bg-zinc-600', 'dark:bg-zinc-500');
+            upcomingToggle.classList.add('bg-zinc-200', 'dark:bg-zinc-700');
+            upcomingToggleThumb.classList.remove('translate-x-6');
+            upcomingToggleThumb.classList.add('translate-x-1');
+          }
+          renderRoutes();
         });
       }
 
@@ -240,10 +267,28 @@
         const term = searchInput.value.trim().toLowerCase();
         routesList.innerHTML = '';
 
-        const filtered = routes.filter(r =>
-                r.category === activeCategory &&
-          (r.name + ' ' + (r.description || '') + ' ' + r.file).toLowerCase().includes(term)
-            );
+        let filtered = routes.filter(r => {
+          const matchesCategory = r.category === activeCategory;
+          const matchesSearch = (r.name + ' ' + (r.description || '') + ' ' + r.file).toLowerCase().includes(term);
+          const isUpcoming = r.upcoming === true;
+          
+          if (!showUpcomingRoutes && isUpcoming) {
+            return false;
+          }
+          
+          return matchesCategory && matchesSearch;
+        });
+
+        // Sort: upcoming routes first when enabled
+        if (showUpcomingRoutes) {
+          filtered.sort((a, b) => {
+            const aUpcoming = a.upcoming === true;
+            const bUpcoming = b.upcoming === true;
+            if (aUpcoming && !bUpcoming) return -1;
+            if (!aUpcoming && bUpcoming) return 1;
+            return 0;
+          });
+        }
 
         if (!filtered.length) {
           routesList.innerHTML = '<div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">No routes found.</div>';
@@ -252,11 +297,15 @@
 
         filtered.forEach(route => {
           const card = document.createElement('article');
+          const isUpcoming = route.upcoming === true;
           card.className = 'group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900';
           card.innerHTML = `
             <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">${escapeHtml(route.name)}</h3>
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">${escapeHtml(route.name)}</h3>
+                  ${isUpcoming ? '<span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"><i data-lucide="calendar" class="h-3 w-3"></i>Upcoming</span>' : ''}
+                </div>
                 <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">${escapeHtml(route.description || 'No description')}</p>
               </div>
               <span class="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">${route.category === 'hiking' ? 'Hiking' : 'Moto'}</span>

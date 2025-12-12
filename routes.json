@@ -1,22 +1,90 @@
 [
   {
     "file": "traseu1.gpx",
-    "name": "Moldoveanu Peak (example)",
-    "description": "Hiking trail — example added for demonstration.",
+    "name": "Moldoveanu Peak Trail",
+    "description": "Challenging hike to Romania's highest peak at 2,544m. Stunning alpine views and diverse terrain.",
+    "category": "hiking",
+    "difficulty": "hard",
+    "duration": "8h",
+    "type": "out-and-back",
+    "parking": [50.79, 2.746],
+    "upcoming": false
+  },
+  {
+    "file": "traseu2.gpx",
+    "name": "Transfăgărășan Highway",
+    "description": "Epic motorcycle ride on one of the most scenic roads in the world. Winding mountain passes with breathtaking views.",
+    "category": "moto",
+    "difficulty": "medium",
+    "duration": "4h",
+    "type": "point-to-point",
+    "parking": [50.79, 2.746],
+    "upcoming": false
+  },
+  {
+    "file": "traseu1.gpx",
+    "name": "Bucegi Plateau Loop",
+    "description": "Scenic circular route through meadows and rock formations. Perfect for a day hike with moderate elevation gain.",
+    "category": "hiking",
+    "difficulty": "medium",
+    "duration": "5h",
+    "type": "loop",
+    "parking": [50.79, 2.746],
+    "upcoming": false
+  },
+  {
+    "file": "traseu2.gpx",
+    "name": "Transalpina Mountain Road",
+    "description": "High-altitude motorcycle adventure through the Parâng Mountains. Long sweeping curves and panoramic vistas.",
+    "category": "moto",
+    "difficulty": "easy",
+    "duration": "3h",
+    "type": "out-and-back",
+    "parking": [50.79, 2.746],
+    "upcoming": false
+  },
+  {
+    "file": "traseu1.gpx",
+    "name": "Omu Peak via Babele",
+    "description": "Classic route passing the famous Babele rock formations. Mix of technical sections and easy walking paths.",
     "category": "hiking",
     "difficulty": "medium",
     "duration": "6h",
     "type": "out-and-back",
-    "parking": [50.79, 2.746]
+    "parking": [50.79, 2.746],
+    "upcoming": true
   },
   {
     "file": "traseu2.gpx",
-    "name": "Transfăgărășan Moto (example)",
-    "description": "Spectacular motorcycle route — example.",
+    "name": "Cheile Turzii Canyon Ride",
+    "description": "Winding roads through dramatic limestone canyon. Great mix of technical riding and scenic stops.",
     "category": "moto",
-    "difficulty": "medium",
+    "difficulty": "hard",
+    "duration": "5h",
+    "type": "loop",
+    "parking": [50.79, 2.746],
+    "upcoming": true
+  },
+  {
+    "file": "traseu1.gpx",
+    "name": "Piatra Craiului Ridge",
+    "description": "Exposed ridge walk with spectacular views. Requires good weather and solid hiking experience.",
+    "category": "hiking",
+    "difficulty": "hard",
+    "duration": "10h",
+    "type": "point-to-point",
+    "parking": [50.79, 2.746],
+    "upcoming": false
+  },
+  {
+    "file": "traseu2.gpx",
+    "name": "Danube Delta Exploration",
+    "description": "Peaceful ride through unique delta landscapes. Combine with boat trips for a complete experience.",
+    "category": "moto",
+    "difficulty": "easy",
     "duration": "6h",
-    "type": "out-and-back",
-    "parking": [50.79, 2.746]
+    "type": "loop",
+    "parking": [50.79, 2.746],
+    "upcoming": false
   }
 ]
